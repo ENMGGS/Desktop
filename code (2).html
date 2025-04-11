@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Credit ENM in Title -->
+    <title>Ubuntu Web Desktop Simulation v2.3 by ENM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* --- Global Styles & Resets --- */
+        :root {
+            --accent-color: #E95420; /* Default Ubuntu Orange Accent */
+            --bg-color: #252526;
+            --bg-secondary-color: #2d2d2d;
+            --bg-tertiary-color: #3c3c3c;
+            --title-bar-bg: #1e1e1e;
+            --text-color: #ddd;
+            --text-secondary-color: #bbb;
+            --border-color: #555;
+            --hover-bg-color: rgba(255, 255, 255, 0.1);
+            --active-bg-color: rgba(80, 140, 220, 0.4);
+            --top-bar-bg: rgba(30, 30, 30, 0.9);
+            --dock-bg: rgba(45, 45, 45, 0.9);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Ubuntu', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-color: #4a3754; /* Fallback if background image fails */
+            color: var(--text-color); /* Default text color */
+        }
+
+        /* --- Theme Variations --- */
+        body.theme-light {
+            --bg-color: #fdfdfd;
+            --bg-secondary-color: #f0f0f0;
+            --bg-tertiary-color: #e8e8e8;
+            --title-bar-bg: #e0e0e0;
+            --text-color: #222;
+            --text-secondary-color: #555;
+            --border-color: #ccc;
+            --hover-bg-color: rgba(0, 0, 0, 0.05);
+            --active-bg-color: rgba(80, 140, 220, 0.2);
+            --top-bar-bg: rgba(245, 245, 245, 0.9);
+            --dock-bg: rgba(235, 235, 235, 0.9);
+        }
+         body.theme-light #top-bar,
+         body.theme-light #dock,
+         body.theme-light #system-menu { color: #333; }
+         body.theme-light .window { background-color: var(--bg-secondary-color); border-color: var(--border-color); }
+         body.theme-light .window-content { background-color: var(--bg-color); color: var(--text-color); }
+         body.theme-light .title-bar { background-color: var(--title-bar-bg); color: var(--text-color); border-bottom-color: var(--border-color);}
+         body.theme-light .title-bar-controls button { color: #555; }
+         body.theme-light .title-bar-controls button:hover { background-color: rgba(0, 0, 0, 0.1); }
+         body.theme-light .close-btn:hover { background-color: #e81123 !important; color: white; }
+         body.theme-light .dock-item { background-color: rgba(180, 180, 180, 0.6); color: #333; }
+         body.theme-light .dock-item:hover { background-color: rgba(150, 150, 150, 0.8); }
+         body.theme-light #desktop-icons { color: #333; text-shadow: 1px 1px 2px rgba(255,255,255,0.5); }
+         body.theme-light #desktop-icons .desktop-icon:hover { background-color: var(--hover-bg-color); }
+         body.theme-light #settings-sidebar div:hover { background-color: var(--hover-bg-color); }
+         body.theme-light #settings-sidebar .active { background-color: var(--active-bg-color); }
+         body.theme-light .settings-section button,
+         body.theme-light .settings-section select,
+         body.theme-light .settings-section input[type="color"] { background-color: #e0e0e0; color: #333; border-color: #ccc;}
+         body.theme-light .settings-section button:hover { background-color: #d0d0d0; }
+         body.theme-light #calculator-window .window-content { background-color: var(--bg-tertiary-color); }
+         body.theme-light #calculator-window button { background-color: #f0f0f0; border-color: #d5d5d5; color: #333; }
+         body.theme-light #calculator-window button:hover { background-color: #e0e0e0; }
+         body.theme-light #calculator-window .op-button { background-color: var(--accent-color); color: white; } /* Accent color applied */
+         body.theme-light #calculator-window .op-button:hover { filter: brightness(1.1); }
+         body.theme-light #calc-display { background-color: #f8f8f8; color: #333; }
+         body.theme-light #terminal-window .window-content { background-color: rgba(250, 250, 250, 0.8); color: #222; } /* Light terminal requires different text colors */
+         body.theme-light #terminal-output .prompt { color: #0055aa; }
+         body.theme-light #terminal-output .command { color: #000000; }
+         body.theme-light #terminal-output .error { color: #cc0000; }
+         body.theme-light #terminal-output .info { color: #cc8800; }
+         body.theme-light #terminal-output .neofetch-ascii { color: #5555dd; }
+         body.theme-light #terminal-output .neofetch-label { color: #3333bb; }
+         body.theme-light #terminal-output .neofetch-value { color: #000000; }
+         body.theme-light #terminal-input-line .prompt { color: #0055aa; }
+         body.theme-light #terminal-input { color: #000000; caret-color: #000000; }
+         body.theme-light #editor-window .window-content { background-color: #fdfdfd; }
+         body.theme-light #text-editor-area { background-color: #fdfdfd; color: #1e1e1e; }
+
+
+        body.theme-dark { /* Default theme IS the dark theme */
+             /* No overrides needed unless defaults change */
+        }
+
+
+        /* --- Desktop --- */
+        #desktop {
+            height: 100%;
+            width: 100%;
+            background: url('https://wallpapercave.com/wp/wp9103877.jpg') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding-top: 30px;
+            padding-bottom: 60px;
+        }
+
+        /* --- Top Bar --- */
+        #top-bar {
+            background-color: var(--top-bar-bg);
+            color: var(--text-color);
+            padding: 0 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+            height: 30px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        #activities {
+            font-weight: bold;
+            cursor: default;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+         #activities:hover {
+             background-color: var(--hover-bg-color);
+         }
+
+        #clock {
+            font-variant-numeric: tabular-nums;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: default;
+        }
+         #clock:hover {
+             background-color: var(--hover-bg-color);
+         }
+
+         /* System Icons Area - Wrapper for click handling */
+         #system-icons-area {
+             position: relative; /* For dropdown positioning */
+             cursor: pointer;
+             padding: 0 5px; /* Padding for click area */
+             border-radius: 4px;
+         }
+         #system-icons-area:hover {
+             background-color: var(--hover-bg-color);
+         }
+
+        #system-icons {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            height: 100%;
+            padding: 0 10px; /* Adjusted padding */
+        }
+
+        #system-icons span { /* Individual icon wrappers */
+             display: inline-flex;
+             align-items: center;
+             gap: 4px;
+        }
+        #system-icons .fa-wifi,
+        #system-icons .fa-volume-high,
+        #system-icons .fa-battery-three-quarters, /* Add all possible battery icons */
+        #system-icons .fa-battery-full,
+        #system-icons .fa-battery-half,
+        #system-icons .fa-battery-quarter,
+        #system-icons .fa-battery-empty,
+        #system-icons .fa-bolt /* Charging */
+        {
+            font-size: 1.1em;
+        }
+
+
+        /* --- System Menu Dropdown --- */
+        #system-menu {
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 100%; /* Position below the top bar */
+            right: 0;
+            background-color: var(--dock-bg); /* Match dock bg */
+            color: var(--text-color);
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            min-width: 250px;
+            z-index: 1100; /* Above top bar */
+            border: 1px solid var(--border-color);
+            border-top: none;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+        }
+        #system-menu.visible {
+            display: block;
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .menu-section {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .menu-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            gap: 10px;
+            font-size: 0.95em;
+            color: var(--text-color); /* Ensure text color contrasts */
+            text-decoration: none; /* Remove underline from potential links */
+        }
+        .menu-item:hover {
+            background-color: var(--hover-bg-color);
+        }
+        .menu-item i.fa-solid, .menu-item i.fa-brands {
+            width: 18px; /* Icon alignment */
+            text-align: center;
+            color: var(--text-secondary-color);
+        }
+         .menu-item:hover i {
+            color: var(--text-color);
+         }
+         .menu-slider {
+             display: flex;
+             align-items: center;
+             gap: 10px;
+             padding: 5px 10px;
+         }
+         .menu-slider input[type="range"] {
+             flex-grow: 1;
+             cursor: pointer;
+         }
+         .menu-label {
+             font-size: 0.85em;
+             color: var(--text-secondary-color);
+             margin-bottom: 5px;
+             padding: 0 10px;
+         }
+
+
+        /* --- Dock (Bottom) --- */
+        #dock {
+            background-color: var(--dock-bg);
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 60px;
+            z-index: 999;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body.theme-light #dock { border-top-color: rgba(0, 0, 0, 0.1); }
+
+        .dock-item {
+            background-color: rgba(80, 80, 80, 0.6);
+            color: white;
+            border-radius: 8px;
+            padding: 5px;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            position: relative;
+            overflow: visible;
+        }
+        .dock-item:hover {
+            background-color: rgba(100, 100, 100, 0.9);
+            transform: scale(1.1) translateY(-3px);
+        }
+        /* Dock Tooltip */
+        .dock-item::after { /* Style remains the same */
+            content: attr(data-tooltip);
+            position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.85); color: white; padding: 5px 10px; border-radius: 4px;
+            font-size: 0.85em; white-space: nowrap; opacity: 0; visibility: hidden;
+            transition: opacity 0.2s ease 0.1s, visibility 0.2s ease 0.1s;
+            pointer-events: none; z-index: 1001;
+        }
+        .dock-item:hover::after { opacity: 1; visibility: visible; }
+
+        /* --- Desktop Icons --- */
+        #desktop-icons {
+            position: absolute; top: 40px; left: 15px; z-index: 10;
+            display: flex; flex-direction: column; gap: 15px;
+            color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+        .desktop-icon { /* Style remains the same */
+            display: flex; flex-direction: column; align-items: center;
+            padding: 5px; border-radius: 4px; cursor: pointer; width: 80px; text-align: center;
+            transition: background-color 0.2s ease;
+        }
+        .desktop-icon:hover { background-color: var(--hover-bg-color); }
+        .desktop-icon .icon { font-size: 36px; margin-bottom: 5px; width: 40px; height: 40px; display: inline-flex; justify-content: center; align-items: center; }
+        .desktop-icon .label { font-size: 0.8em; word-wrap: break-word; }
+
+
+        /* --- Windows Area & General Window Styles --- */
+        #windows-area { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .window {
+            position: absolute;
+            background-color: var(--bg-secondary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            min-width: 250px; /* Slightly smaller min-width */
+            min-height: 150px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 900;
+            resize: both;
+            pointer-events: auto;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .window.maximized { resize: none; }
+        .window.dragging { opacity: 0.85; cursor: grabbing; }
+        .window.window-active { border-color: var(--accent-color); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); }
+        .window.window-active .title-bar { background-color: var(--title-bar-bg); /* Darker/lighter active title */ }
+         body:not(.theme-light) .window.window-active .title-bar { background-color: #3a3a3a; }
+         body.theme-light .window.window-active .title-bar { background-color: #d0d0d0; }
+
+        .title-bar {
+            background-color: var(--title-bar-bg);
+            color: var(--text-color);
+            padding: 5px 10px;
+            cursor: move;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 30px;
+            border-bottom: 1px solid var(--border-color);
+            user-select: none;
+            border-radius: 8px 8px 0 0;
+             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+         .title-bar-title { font-weight: bold; font-size: 0.9em; display: flex; align-items: center; gap: 6px; }
+         .title-bar-controls button { background: none; border: none; color: var(--text-secondary-color); font-size: 16px; font-weight: bold; margin-left: 8px; cursor: pointer; padding: 2px 5px; line-height: 1; border-radius: 3px; transition: background-color 0.2s, color 0.2s; }
+         .title-bar-controls button:hover { background-color: var(--hover-bg-color); color: var(--text-color); }
+         .close-btn:hover { background-color: #e81123 !important; color: white !important; }
+
+        .window-content {
+            padding: 10px;
+            flex-grow: 1;
+            overflow: auto;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            font-size: 0.95em;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* --- Terminal Specific Styles --- */
+        #terminal-window .window-content {
+            /* IMPORTANT: backdrop-filter requires the background to have alpha transparency */
+            background-color: rgba(30, 30, 30, 0.75); /* Dark with alpha - ADJUST alpha (0.1 - 0.9) for desired effect */
+
+            /* Apply blur to the content *behind* this element */
+            /* NOTE: May not work in all browsers (e.g., Firefox needs flags enabled) */
+            -webkit-backdrop-filter: blur(8px); /* Safari */
+            backdrop-filter: blur(8px); /* Standard */
+
+            font-family: 'Ubuntu Mono', 'Courier New', Courier, monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            padding: 5px;
+            color: #00dd00; /* Default green text */
+            transition: background-color 0.3s ease, color 0.3s ease; /* Added transition */
+        }
+        #terminal-output { white-space: pre-wrap; word-wrap: break-word; }
+        #terminal-output .prompt { color: #55aaff; font-weight: bold;}
+        #terminal-output .command { color: #ffffff; }
+        #terminal-output .error { color: #ff5555; }
+        #terminal-output .info { color: #ffff55; }
+        #terminal-output .neofetch-ascii { color: #7777ff; }
+        #terminal-output .neofetch-label { color: #aaaaff; font-weight: bold; }
+        #terminal-output .neofetch-value { color: #ffffff; }
+        #terminal-input-line { display: flex; align-items: center; }
+        #terminal-input-line .prompt { color: #55aaff; font-weight: bold; margin-right: 5px; }
+        #terminal-input { background: none; border: none; outline: none; color: #ffffff; font-family: inherit; font-size: inherit; flex-grow: 1; caret-color: #ffffff; }
+
+        /* --- Settings App Styles --- */
+        #settings-window .window-content { display: flex; }
+        #settings-sidebar {
+            width: 160px; /* Slightly wider */
+            border-right: 1px solid var(--border-color);
+            padding-right: 10px; margin-right: 10px; flex-shrink: 0;
+            transition: border-color 0.3s ease;
+        }
+        #settings-sidebar div {
+            padding: 8px 10px; cursor: pointer; border-radius: 4px; margin-bottom: 5px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            display: flex; align-items: center; gap: 10px; /* Increased gap */
+             transition: background-color 0.2s ease;
+        }
+         #settings-sidebar div i { width: 18px; text-align: center; color: var(--text-secondary-color); transition: color 0.2s ease; }
+        #settings-sidebar div:hover { background-color: var(--hover-bg-color); }
+        #settings-sidebar div:hover i { color: var(--text-color); }
+        #settings-sidebar .active {
+            background-color: var(--accent-color); /* Use accent color */
+            font-weight: bold;
+            color: white; /* Ensure text is readable on accent */
+        }
+         #settings-sidebar .active i { color: white; }
+        #settings-main { flex-grow: 1; overflow-y: auto; }
+        .settings-section { display: none; }
+        .settings-section.active { display: block; }
+        .settings-section h3 { margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; color: var(--text-color); transition: border-color 0.3s ease, color 0.3s ease; }
+        .settings-section p { margin-bottom: 10px; line-height: 1.5; }
+        .settings-section label { display: block; margin-bottom: 5px; color: var(--text-secondary-color); transition: color 0.3s ease; }
+        .settings-section select, .settings-section input[type="color"], .settings-section input[type="text"], .settings-section button {
+             margin-bottom: 15px; padding: 8px 10px; background-color: var(--bg-tertiary-color); color: var(--text-color);
+             border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.9em;
+             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+         .settings-section input[type="color"] { padding: 2px; height: 35px; width: 50px; vertical-align: middle; border: 1px solid var(--border-color); background: var(--bg-tertiary-color); cursor: pointer; }
+        .settings-section button { cursor: pointer; background-color: var(--bg-tertiary-color); margin-right: 5px; }
+         .settings-section button:hover { background-color: var(--hover-bg-color); border-color: #777; }
+          body.theme-light .settings-section button:hover { border-color: #bbb; }
+        .settings-section select { min-width: 150px; cursor: pointer;}
+         .settings-section ul { list-style: none; padding-left: 10px; }
+         .settings-section ul li { margin-bottom: 5px; color: var(--text-secondary-color); }
+         .settings-section ul li i { color: #66bbff; margin-right: 8px; }
+         .settings-section hr { border: none; border-top: 1px solid var(--border-color); margin: 20px 0; transition: border-color 0.3s ease;}
+         .settings-section img { max-width: 100%; height: auto; border-radius: 4px; border: 1px solid var(--border-color); margin-bottom: 15px; transition: border-color 0.3s ease;}
+         .settings-section a { color: #87ceff; text-decoration: none; }
+         .settings-section a:hover { text-decoration: underline; }
+
+        /* --- Calculator Styles --- */
+        #calculator-window .window-content {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;
+            background-color: var(--bg-tertiary-color); padding: 10px;
+        }
+        #calculator-window button {
+            padding: 15px 10px; font-size: 1.2em; /* Slightly larger font */
+            background-color: var(--bg-secondary-color); border: 1px solid var(--border-color); color: var(--text-color);
+            border-radius: 4px; cursor: pointer; transition: background-color 0.1s ease, border-color 0.1s ease;
+            display: flex; justify-content: center; align-items: center; /* Center content */
+        }
+        #calculator-window button:hover { background-color: var(--hover-bg-color); border-color: #777; }
+          body.theme-light #calculator-window button:hover { border-color: #bbb; }
+        #calculator-window button:active { filter: brightness(0.8); }
+        #calc-display {
+            grid-column: 1 / -1; background-color: var(--bg-color); color: var(--text-color);
+            font-size: 2.2em; /* Larger display */ padding: 15px; text-align: right; border-radius: 4px;
+            margin-bottom: 10px; min-height: 1.5em; overflow: hidden; white-space: nowrap; word-break: break-all; /* Handle overflow */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        #calculator-window .op-button {
+            background-color: var(--accent-color); /* Use accent color */
+            color: white; /* Ensure text is readable */
+            font-weight: bold;
+        }
+        #calculator-window .op-button:hover { filter: brightness(1.1); border-color: var(--accent-color); }
+        #calculator-window .op-button:active { filter: brightness(0.9); }
+        #calculator-window .zero-button { grid-column: 1 / span 2; }
+        #calculator-window .func-button { /* Style AC, +/-, % differently */
+             background-color: #666;
+             color: #eee;
+        }
+         body.theme-light #calculator-window .func-button { background-color: #d0d0d0; color: #444;}
+
+
+        /* --- Text Editor Styles --- */
+        #editor-window .window-content { padding: 0; display: flex; }
+        #text-editor-area {
+            width: 100%; height: 100%; border: none; outline: none; background-color: var(--title-bar-bg); /* Match title bar */
+            color: var(--text-color); font-family: 'Ubuntu Mono', 'Courier New', monospace; font-size: 14px;
+            padding: 10px; resize: none; flex-grow: 1;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* --- Placeholder Window Styles --- */
+         .placeholder-content { /* Styles remain similar */
+            display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+            gap: 15px; height: 100%; color: var(--text-secondary-color);
+         }
+          .placeholder-content i { font-size: 48px; color: var(--text-secondary-color); opacity: 0.7;}
+          .placeholder-content button {
+             padding: 10px 15px; background-color: var(--bg-tertiary-color); color: var(--text-color);
+             border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.9em; cursor: pointer;
+             transition: background-color 0.2s ease;
+         }
+          .placeholder-content button:hover { background-color: var(--hover-bg-color); }
+
+        /* --- Files App Placeholder --- */
+         #files-window .window-content { background-color: var(--bg-color); color: var(--text-color); }
+         .file-item {
+             display: flex; align-items: center; padding: 5px 10px; border-radius: 4px;
+             margin-bottom: 3px; cursor: pointer; /* Make clickable */
+             transition: background-color 0.2s ease;
+         }
+          .file-item:hover { background-color: var(--hover-bg-color); }
+          .file-item i { margin-right: 10px; color: #87ceff; width: 20px; text-align: center; }
+          .file-item i.fa-file-alt { color: var(--text-secondary-color); } /* Different color for files */
+
+        /* --- Image Viewer Placeholder --- */
+         #image-viewer-window .window-content { display: flex; align-items: center; justify-content: center; background-color: #222; }
+         #image-viewer-window i { font-size: 80px; color: #666; }
+         #image-viewer-window p { position: absolute; bottom: 20px; color: #888; }
+
+        /* --- About Window Style --- */
+         #about-window .window-content { line-height: 1.6; }
+         #about-window strong { color: var(--text-color); display: inline-block; width: 150px; }
+         #about-window hr { border: none; border-top: 1px solid var(--border-color); margin: 15px 0; transition: border-color 0.3s ease;}
+         #about-window a { color: #87ceff; text-decoration: none; }
+         #about-window a:hover { text-decoration: underline; }
+
+
+    </style>
+</head>
+<body> <!-- Start with default dark theme -->
+    <div id="desktop">
+        <!-- Top Bar -->
+        <div id="top-bar">
+            <div id="activities">Activities</div>
+            <div id="clock"></div>
+            <!-- Wrap system icons for click handling -->
+            <div id="system-icons-area">
+                <div id="system-icons">
+                    <span title="Network Status - Connected (Simulated)"><i class="fas fa-wifi"></i></span>
+                    <span title="Sound Volume - Max"><i class="fas fa-volume-high"></i></span>
+                    <span id="battery-status" title="Battery Status">
+                        <i id="battery-icon" class="fas fa-battery-three-quarters"></i>
+                        <span id="battery-percent">95%</span>
+                    </span>
+                </div>
+                 <!-- System Menu Dropdown -->
+                <div id="system-menu">
+                    <div class="menu-section">
+                        <div class="menu-label">Volume</div>
+                        <div class="menu-slider">
+                            <i class="fa-solid fa-volume-low"></i>
+                            <input type="range" min="0" max="100" value="80" aria-label="Volume Control (Simulated)">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </div>
+                    </div>
+                     <div class="menu-section">
+                         <div class="menu-label">Network</div>
+                         <div class="menu-item non-interactive"> <!-- Make non-interactive -->
+                             <i class="fas fa-wifi"></i> <span>Wired Connected (Sim)</span>
+                         </div>
+                         <div class="menu-item" onclick="toggleWindow('settings-window'); showSettingsSection('network'); closeSystemMenu();">
+                             <i class="fas fa-cog"></i> <span>Network Settings</span>
+                         </div>
+                     </div>
+                     <div class="menu-section">
+                         <div class="menu-label">Power</div>
+                         <div class="menu-item" onclick="toggleWindow('settings-window'); showSettingsSection('power'); closeSystemMenu();"> <!-- Power section doesn't exist yet -->
+                             <i class="fas fa-bolt"></i> <span id="menu-battery-status">Battery: 95% (Discharging)</span>
+                         </div>
+                         <div class="menu-item" onclick="alert('Power Off / Log Out - Not Implemented')">
+                             <i class="fas fa-power-off"></i> <span>Power Off / Log Out...</span>
+                         </div>
+                         <div class="menu-item" onclick="toggleWindow('settings-window'); closeSystemMenu();">
+                             <i class="fas fa-cog"></i> <span>Settings</span>
+                         </div>
+                     </div>
+                </div>
+            </div>
+        </div>
+
+         <!-- Desktop Icons -->
+        <div id="desktop-icons">
+             <div class="desktop-icon" onclick="toggleWindow('files-window')" title="User's Files - By ENM">
+                 <span class="icon"><i class="fas fa-folder-open" style="color: #ffca28;"></i></span>
+                 <span class="label">Home</span>
+             </div>
+             <div class="desktop-icon" onclick="alert('Trash - Not Implemented (ENM)')" title="Trash Bin">
+                 <span class="icon"><i class="fas fa-trash-alt" style="color: #aaa;"></i></span>
+                 <span class="label">Trash</span>
+             </div>
+        </div>
+
+
+        <!-- Windows Area (container for absolute positioned windows) -->
+        <div id="windows-area">
+
+            <!-- Terminal Window -->
+            <div id="terminal-window" class="window" style="top: 100px; left: 150px; width: 650px; height: 400px;">
+                <div class="title-bar">
+                    <span class="title-bar-title"><i class="fas fa-terminal"></i>user@ubuntu-web: ~ (by ENM)</span>
+                    <div class="title-bar-controls">
+                        <button onclick="minimizeWindow('terminal-window')" aria-label="Minimize">_</button>
+                        <button onclick="maximizeWindow('terminal-window')" aria-label="Maximize">□</button>
+                        <button class="close-btn" onclick="closeWindow('terminal-window')" aria-label="Close">X</button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <div id="terminal-output"></div>
+                    <div id="terminal-input-line">
+                        <span class="prompt">user@ubuntu-web:~$</span>
+                        <input type="text" id="terminal-input" autocomplete="off" spellcheck="false">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Window -->
+            <div id="settings-window" class="window" style="top: 150px; left: 250px; width: 600px; height: 480px;">
+                <div class="title-bar">
+                    <span class="title-bar-title"><i class="fas fa-cog"></i>Settings (by ENM)</span>
+                    <div class="title-bar-controls">
+                        <button onclick="minimizeWindow('settings-window')" aria-label="Minimize">_</button>
+                        <button onclick="maximizeWindow('settings-window')" aria-label="Maximize">□</button>
+                        <button class="close-btn" onclick="closeWindow('settings-window')" aria-label="Close">X</button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <div id="settings-sidebar">
+                        <div id="sidebar-network" onclick="showSettingsSection('network')" class="active"><i class="fas fa-wifi"></i> Network</div>
+                        <div id="sidebar-background" onclick="showSettingsSection('background')"><i class="fas fa-image"></i> Background</div>
+                        <div id="sidebar-appearance" onclick="showSettingsSection('appearance')"><i class="fas fa-palette"></i> Appearance</div>
+                        <div id="sidebar-users" onclick="showSettingsSection('users')"><i class="fas fa-users"></i> Users</div>
+                        <div id="sidebar-about" onclick="toggleWindow('about-window')"><i class="fas fa-info-circle"></i> About ENM Sim</div>
+                    </div>
+                    <div id="settings-main">
+                         <div id="settings-network" class="settings-section active">
+                            <h3>Network</h3>
+                            <p><strong><i class="fas fa-ethernet" style="margin-right: 5px;"></i> Wired Connection:</strong> Connected (Simulated by ENM)</p>
+                            <p><strong>Speed:</strong> 1000 Mb/s</p>
+                            <p><strong>IP Address:</strong> 192.168.1.10 (Fake)</p>
+                            <hr>
+                            <p><strong>Visible Wi-Fi Networks:</strong></p>
+                            <ul>
+                                <li><i class="fas fa-signal"></i> ENM-Guest (Excellent)</li>
+                                <li><i class="fas fa-signal" style="opacity: 0.7;"></i> HomeNetwork (Good)</li>
+                                <li><i class="fas fa-signal" style="opacity: 0.4;"></i> CoffeeShopFree (Fair)</li>
+                            </ul>
+                            <button onclick="alert('Connect to Hidden Network - Not Implemented (ENM)')" style="margin-top: 10px;"><i class="fas fa-plus" style="margin-right: 5px;"></i>Connect to Hidden Network...</button>
+                        </div>
+                         <div id="settings-background" class="settings-section">
+                            <h3>Background</h3>
+                            <p>Current Wallpaper (Set by ENM):</p>
+                            <img src="https://wallpapercave.com/wp/wp9103877.jpg" alt="Current Wallpaper Thumbnail" style="width: 200px;">
+                            <br>
+                            <button onclick="alert('Change Background - Not Implemented (ENM)')"><i class="fas fa-folder-open" style="margin-right: 5px;"></i>Change Background...</button>
+                         </div>
+                         <div id="settings-appearance" class="settings-section">
+                            <h3>Appearance</h3>
+                            <p>Change the look and feel of your desktop (ENM's Sim).</p>
+                            <label for="theme-select">Style:</label>
+                            <select id="theme-select">
+                                <option value="dark">Yaru-dark (Default)</option>
+                                <option value="light">Yaru-light</option>
+                                <!-- Add more theme options later if needed -->
+                            </select>
+                            <br><br>
+                             <label for="accent-color">Accent Color:</label>
+                             <input type="color" id="accent-color" value="#E95420">
+                        </div>
+                         <div id="settings-users" class="settings-section">
+                            <h3>Users</h3>
+                            <p><strong>Current User:</strong> ENM_User</p>
+                            <p>Administrator</p>
+                            <button onclick="alert('Change Password - Not Implemented (ENM)')"><i class="fas fa-key" style="margin-right: 5px;"></i>Change Password...</button>
+                            <button onclick="alert('Avatar Change - Not Implemented (ENM)')"><i class="fas fa-user-circle" style="margin-right: 5px;"></i>Avatar</button>
+                            <hr>
+                             <button onclick="alert('Add User - Not Implemented (ENM)')"><i class="fas fa-user-plus" style="margin-right: 5px;"></i>Add User...</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Calculator Window -->
+            <div id="calculator-window" class="window" style="top: 200px; left: 400px; width: 300px; height: auto;"> <!-- Auto height -->
+                <div class="title-bar">
+                    <span class="title-bar-title"><i class="fas fa-calculator"></i>Calculator (by ENM)</span>
+                    <div class="title-bar-controls">
+                        <button onclick="minimizeWindow('calculator-window')" aria-label="Minimize">_</button>
+                         <!-- Maximize disabled for fixed size calc -->
+                        <button disabled style="opacity: 0.5; cursor: not-allowed;">□</button>
+                        <button class="close-btn" onclick="closeWindow('calculator-window')" aria-label="Close">X</button>
+                    </div>
+                </div>
+                <div class="window-content" id="calculator-buttons"> <!-- Added ID for event delegation -->
+                     <div id="calc-display">0</div>
+                     <button class="func-button" data-action="clear">AC</button>
+                     <button class="func-button" data-action="toggle-sign">+/-</button>
+                     <button class="func-button" data-action="percent">%</button>
+                     <button class="op-button" data-action="operator" data-operator="divide">÷</button>
+
+                     <button data-action="number">7</button>
+                     <button data-action="number">8</button>
+                     <button data-action="number">9</button>
+                     <button class="op-button" data-action="operator" data-operator="multiply">×</button>
+
+                     <button data-action="number">4</button>
+                     <button data-action="number">5</button>
+                     <button data-action="number">6</button>
+                     <button class="op-button" data-action="operator" data-operator="subtract">-</button>
+
+                     <button data-action="number">1</button>
+                     <button data-action="number">2</button>
+                     <button data-action="number">3</button>
+                     <button class="op-button" data-action="operator" data-operator="add">+</button>
+
+                     <button class="zero-button" data-action="number">0</button>
+                     <button data-action="decimal">.</button>
+                     <button class="op-button" data-action="equals">= </button>
+                </div>
+            </div>
+
+            <!-- Text Editor Window -->
+            <div id="editor-window" class="window" style="top: 250px; left: 550px; width: 500px; height: 350px;">
+                <div class="title-bar">
+                    <span class="title-bar-title"><i class="fas fa-file-alt"></i>Text Editor (by ENM)</span>
+                    <div class="title-bar-controls">
+                        <button onclick="minimizeWindow('editor-window')" aria-label="Minimize">_</button>
+                        <button onclick="maximizeWindow('editor-window')" aria-label="Maximize">□</button>
+                        <button class="close-btn" onclick="closeWindow('editor-window')" aria-label="Close">X</button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <textarea id="text-editor-area" placeholder="Start typing... (ENM was here)"></textarea>
+                </div>
+            </div>
+
+             <!-- Files App Window -->
+             <div id="files-window" class="window" style="top: 80px; left: 100px; width: 550px; height: 450px;">
+                <div class="title-bar">
+                    <span class="title-bar-title"><i class="fas fa-folder-open"></i>Files (by ENM)</span>
+                    <div class="title-bar-controls">
+                        <button onclick="minimizeWindow('files-window')" aria-label="Minimize">_</button>
+                        <button onclick="maximizeWindow('files-window')" aria-label="Maximize">□</button>
+                        <button class="close-btn" onclick="closeWindow('files-window')" aria-label="Close">X</button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <p style="margin-bottom: 10px; color: var(--text-secondary-color);">Location: /home/ENM_User</p>
+                    <div class="file-item" onclick="alert('Opening Desktop... (Simulated by ENM)')"><i class="fas fa-folder"></i> Desktop</div>
+                    <div class="file-item" onclick="alert('Opening Documents... (Simulated by ENM)')"><i class="fas fa-folder"></i> Documents</div>
+                    <div class="file-item" onclick="alert('Opening Downloads... (Simulated by ENM)')"><i class="fas fa-folder"></i> Downloads</div>
+                    <div class="file-item" onclick="alert('Opening Music... (Simulated by ENM)')"><i class="fas fa-folder"></i> Music</div>
+                    <div class="file-item" onclick="alert('Opening Pictures... (Simulated by ENM)')"><i class="fas fa-folder"></i> Pictures</div>
+                    <div class="file-item" onclick="alert('Opening Videos... (Simulated by ENM)')"><i class="fas fa-folder"></i> Videos</div>
+                    <div class="file-item" onclick="alert('Opening README.txt... (Simulated by ENM)')"><i class="fas fa-file-alt"></i> README.txt</div>
+                    <div class="file-item" onclick="alert('Opening ENM_notes.txt... (Simulated by ENM)')"><i class="fas fa-file-alt"></i> ENM_notes.txt</div>
+                     <div class="file-item" onclick="toggleWindow('github-window')" style="margin-top: 20px; color: #87ceff;"><i class="fab fa-github" style="color: var(--text-color);"></i> Open ENM's GitHub Project (Simulated)</div>
+                </div>
+            </div>
+
+             <!-- Image Viewer Window -->
+             <div id="image-viewer-window" class="window" style="top: 180px; left: 350px; width: 400px; height: 300px;">
+                 <div class="title-bar">
+                    <span class="title-bar-title"><i class="fas fa-image"></i>Image Viewer (by ENM)</span>
+                    <div class="title-bar-controls">
+                        <button onclick="minimizeWindow('image-viewer-window')" aria-label="Minimize">_</button>
+                        <button onclick="maximizeWindow('image-viewer-window')" aria-label="Maximize">□</button>
+                        <button class="close-btn" onclick="closeWindow('image-viewer-window')" aria-label="Close">X</button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <i class="fas fa-image"></i>
+                    <p>No image loaded (ENM Placeholder)</p>
+                </div>
+            </div>
+
+             <!-- About Window -->
+             <div id="about-window" class="window" style="top: 220px; left: 450px; width: 550px; height: auto;"> <!-- Auto Height -->
+                <div class="title-bar">
+                    <span class="title-bar-title"><i class="fas fa-info-circle"></i>About ENM's Ubuntu Web Sim</span>
+                    <div class="title-bar-controls">
+                        <button onclick="minimizeWindow('about-window')" aria-label="Minimize">_</button>
+                         <button disabled style="opacity: 0.5; cursor: not-allowed;">□</button> <!-- Disable Maximize -->
+                        <button class="close-btn" onclick="closeWindow('about-window')" aria-label="Close">X</button>
+                    </div>
+                </div>
+                <div class="window-content">
+                     <h3>Ubuntu Web Simulation v2.3</h3>
+                     <hr>
+                     <p><strong>OS Name:</strong> Ubuntu Web Simulation v2.3</p>
+                     <p><strong>GNOME Version:</strong> 42.web (Simulated by ENM)</p>
+                     <p><strong>Windowing System:</strong> Browser DOM</p>
+                     <p><strong>Hardware Model:</strong> Your Device</p>
+                     <p><strong>Memory:</strong> Browser Allocated</p>
+                     <p><strong>Processor:</strong> Your CPU via JavaScript</p>
+                     <p><strong>Graphics:</strong> Browser Renderer</p>
+                     <p><strong>Disk Capacity:</strong> N/A (ENM Sim)</p>
+                     <hr>
+                     <p><strong>Created By:</strong> ENM</p>
+                     <p><a href="#" onclick="alert('Checking for updates... No updates found (ENM Simulation).')">Check for Updates</a></p>
+                </div>
+            </div>
+
+
+            <!-- PLACEHOLDER WINDOWS for external sites -->
+            <!-- GitHub Placeholder -->
+            <div id="github-window" class="window" style="top: 120px; left: 200px; width: 500px; height: 300px;">
+                <div class="title-bar"> <span class="title-bar-title"><i class="fab fa-github"></i>GitHub (Simulated by ENM)</span> <div class="title-bar-controls"> <button onclick="minimizeWindow('github-window')">_</button> <button onclick="maximizeWindow('github-window')">□</button> <button class="close-btn" onclick="closeWindow('github-window')">X</button> </div> </div>
+                <div class="window-content placeholder-content"> <i class="fab fa-github"></i> <p>Simulating GitHub (ENM's Project Space)...</p> <p style="font-size: 0.9em;">Loading external websites directly isn't possible.</p> <button onclick="window.open('https://github.com', '_blank')"><i class="fas fa-external-link-alt"></i>Open GitHub in New Tab</button> </div>
+            </div>
+            <!-- Firefox Placeholder -->
+            <div id="firefox-window" class="window" style="top: 140px; left: 280px; width: 700px; height: 500px;">
+                 <div class="title-bar"> <span class="title-bar-title"><i class="fab fa-firefox-browser"></i>Firefox (Simulated by ENM)</span> <div class="title-bar-controls"> <button onclick="minimizeWindow('firefox-window')">_</button> <button onclick="maximizeWindow('firefox-window')">□</button> <button class="close-btn" onclick="closeWindow('firefox-window')">X</button> </div> </div>
+                 <div class="window-content placeholder-content"> <i class="fab fa-firefox-browser"></i> <p>Simulating Firefox Browser (ENM Edition)...</p> <p style="font-size: 0.9em;">Loading external websites directly isn't possible.</p> <button onclick="window.open('https://www.mozilla.org/firefox/', '_blank')"><i class="fas fa-external-link-alt"></i>Open Mozilla Website in New Tab</button> </div>
+            </div>
+            <!-- VS Code Placeholder -->
+            <div id="vscode-window" class="window" style="top: 160px; left: 360px; width: 750px; height: 550px;">
+                <div class="title-bar"> <span class="title-bar-title"><i class="fas fa-code"></i>VS Code (Simulated by ENM)</span> <div class="title-bar-controls"> <button onclick="minimizeWindow('vscode-window')">_</button> <button onclick="maximizeWindow('vscode-window')">□</button> <button class="close-btn" onclick="closeWindow('vscode-window')">X</button> </div> </div>
+                 <div class="window-content placeholder-content"> <i class="fas fa-code"></i> <p>Simulating VS Code (ENM's Dev Environment)...</p> <p style="font-size: 0.9em;">Loading external websites directly isn't possible.</p> <button onclick="window.open('https://vscode.dev', '_blank')"><i class="fas fa-external-link-alt"></i>Open vscode.dev in New Tab</button> </div>
+            </div>
+
+
+        </div> <!-- End windows-area -->
+
+        <!-- Dock (Bottom) -->
+        <div id="dock">
+            <div class="dock-item" data-tooltip="Files (by ENM)" onclick="toggleWindow('files-window')"><i class="fas fa-folder-open"></i></div>
+            <div class="dock-item" data-tooltip="Firefox (Sim by ENM)" onclick="toggleWindow('firefox-window')"><i class="fab fa-firefox-browser"></i></div>
+            <div class="dock-item" data-tooltip="VS Code (Sim by ENM)" onclick="toggleWindow('vscode-window')"><i class="fas fa-code"></i></div>
+            <div class="dock-item" data-tooltip="Terminal (by ENM)" onclick="toggleWindow('terminal-window')"><i class="fas fa-terminal"></i></div>
+            <div class="dock-item" data-tooltip="Settings (by ENM)" onclick="toggleWindow('settings-window')"><i class="fas fa-cog"></i></div>
+            <div class="dock-item" data-tooltip="Calculator (by ENM)" onclick="toggleWindow('calculator-window')"><i class="fas fa-calculator"></i></div>
+            <div class="dock-item" data-tooltip="Text Editor (by ENM)" onclick="toggleWindow('editor-window')"><i class="fas fa-file-alt"></i></div>
+            <div class="dock-item" data-tooltip="Image Viewer (by ENM)" onclick="toggleWindow('image-viewer-window')"><i class="fas fa-image"></i></div>
+            <div class="dock-item" data-tooltip="About ENM Sim" onclick="toggleWindow('about-window')"><i class="fas fa-info-circle"></i></div>
+        </div>
+
+    </div> <!-- End desktop -->
+
+    <script>
+        // --- Script Start Confirmation ---
+        console.log("ENM's Ubuntu Web Sim Script Initializing v2.3...");
+
+        // --- Global State ---
+        let activeWindow = null;
+        let highestZIndex = 900;
+        let batteryLevel = 95 + Math.random() * 5;
+        let isCharging = Math.random() < 0.3;
+        const windows = {}; // Store window state
+
+        // --- DOM Elements ---
+        const desktopElement = document.getElementById('desktop');
+        const clockElement = document.getElementById('clock');
+        const batteryPercentElement = document.getElementById('battery-percent');
+        const batteryStatusElement = document.getElementById('battery-status');
+        const batteryIconElement = document.getElementById('battery-icon');
+        const menuBatteryStatusElement = document.getElementById('menu-battery-status'); // Menu battery text
+        const terminalOutput = document.getElementById('terminal-output');
+        const terminalInput = document.getElementById('terminal-input');
+        const windowsArea = document.getElementById('windows-area');
+        const systemIconsArea = document.getElementById('system-icons-area');
+        const systemMenu = document.getElementById('system-menu');
+        const calcDisplay = document.getElementById('calc-display');
+        const calcButtonsContainer = document.getElementById('calculator-buttons');
+        const themeSelect = document.getElementById('theme-select');
+        const accentColorInput = document.getElementById('accent-color');
+
+
+        // --- Clock ---
+        function updateClock() {
+            const now = new Date();
+            const options = { weekday: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            if (clockElement) {
+                clockElement.textContent = now.toLocaleTimeString('en-US', options).replace(',', '');
+            }
+        }
+        if (clockElement) {
+            setInterval(updateClock, 1000);
+            updateClock();
+        }
+
+        // --- Battery Simulation ---
+        function updateBattery() {
+            if (isCharging) {
+                 batteryLevel += (Math.random() * 0.1 + 0.05);
+                 if (batteryLevel > 100) batteryLevel = 100;
+            } else {
+                batteryLevel -= (Math.random() * 0.05 + 0.01);
+                if (batteryLevel < 0) batteryLevel = 0;
+            }
+            if (Math.random() < 0.01) { isCharging = !isCharging; } // Randomly toggle charge state
+
+            const displayPercent = Math.floor(batteryLevel);
+            const statusText = isCharging ? `Charging (${displayPercent}%)` : `Discharging (${displayPercent}%)`;
+
+            if (batteryPercentElement && batteryStatusElement && batteryIconElement && menuBatteryStatusElement) {
+                batteryPercentElement.textContent = `${displayPercent}%`;
+                menuBatteryStatusElement.textContent = `Battery: ${statusText}`; // Update menu text
+
+                let title = `Battery: ${statusText} (ENM Sim)`;
+                let iconClass = 'fas ';
+                let statusColor = 'white'; // Default color in dark theme
+
+                if (isCharging) {
+                     iconClass += 'fa-bolt';
+                     statusColor = '#87ff87'; // Green when charging
+                } else {
+                    if (batteryLevel > 85) iconClass += 'fa-battery-full';
+                    else if (batteryLevel > 60) iconClass += 'fa-battery-three-quarters';
+                    else if (batteryLevel > 35) iconClass += 'fa-battery-half';
+                    else if (batteryLevel > 10) iconClass += 'fa-battery-quarter';
+                    else iconClass += 'fa-battery-empty';
+
+                    if (batteryLevel < 10) { title += " - Critically Low!"; statusColor = '#ff5555'; } // Red critical
+                    else if (batteryLevel < 20) { title += " - Low"; statusColor = '#ffbb55'; } // Orange low
+                    // Use default white if > 20% and not charging
+                }
+
+                 batteryIconElement.className = iconClass;
+                 // Apply color only if not light theme OR if charging/low battery
+                 if (!document.body.classList.contains('theme-light') || isCharging || batteryLevel < 20) {
+                    batteryStatusElement.style.color = statusColor;
+                 } else {
+                     batteryStatusElement.style.color = ''; // Use default theme color otherwise
+                 }
+                 batteryStatusElement.title = title;
+            }
+        }
+        if (batteryPercentElement && batteryStatusElement) {
+            setInterval(updateBattery, 10000);
+            updateBattery();
+        }
+
+        // --- Top Panel System Menu ---
+        function toggleSystemMenu() {
+            if (systemMenu) {
+                systemMenu.classList.toggle('visible');
+            }
+        }
+        function closeSystemMenu() {
+             if (systemMenu) {
+                systemMenu.classList.remove('visible');
+            }
+        }
+        if (systemIconsArea) {
+             systemIconsArea.addEventListener('click', (e) => {
+                 e.stopPropagation(); // Prevent click bubbling to document listener
+                 toggleSystemMenu();
+             });
+        }
+        // Close menu if clicking outside
+        document.addEventListener('click', (e) => {
+             if (systemMenu && systemMenu.classList.contains('visible') && !systemIconsArea.contains(e.target)) {
+                 closeSystemMenu();
+             }
+        });
+
+
+        // --- App Handling & Window Management (Mostly unchanged, added logging) ---
+        function getWindowElement(windowId) { return document.getElementById(windowId); }
+
+        function toggleWindow(windowId) {
+            console.log(`ENM_toggleWindow: ${windowId}`);
+            const windowElement = getWindowElement(windowId);
+            if (!windowElement) { console.error(`ENM_Error: Window element #${windowId} not found.`); return; }
+
+            if (windowElement.style.display === 'flex') {
+                 if(activeWindow === windowElement) { /*minimizeWindow(windowId);*/ bringToFront(windowElement); } // Optional: minimize if active clicked
+                 else { bringToFront(windowElement); }
+            } else {
+                windowElement.style.display = 'flex';
+                bringToFront(windowElement);
+                if (windowId === 'terminal-window' && terminalInput) { terminalInput.focus(); }
+                if (!windows[windowId]) { windows[windowId] = { isMaximized: false }; }
+            }
+            closeSystemMenu(); // Close menu when opening an app from it
+        }
+
+        function closeWindow(windowId) {
+            const windowElement = getWindowElement(windowId);
+            if (windowElement) {
+                windowElement.style.display = 'none';
+                windowElement.classList.remove('maximized', 'window-active');
+                 if (windows[windowId]) { windows[windowId].isMaximized = false; }
+                 if(activeWindow === windowElement) { activeWindow = null; }
+                 console.log(`ENM_closeWindow: ${windowId}`);
+            }
+        }
+
+        function minimizeWindow(windowId) { closeWindow(windowId); /* Simple hide */ }
+
+        function maximizeWindow(windowId) {
+             const windowElement = getWindowElement(windowId);
+             if (!windowElement) return;
+             if (!windows[windowId]) windows[windowId] = {};
+             const state = windows[windowId];
+             const topBarHeight = document.getElementById('top-bar')?.offsetHeight || 30;
+             const dockHeight = document.getElementById('dock')?.offsetHeight || 60;
+             const availableHeight = window.innerHeight - topBarHeight - dockHeight;
+
+             windowElement.style.transition = 'top 0.2s ease-out, left 0.2s ease-out, width 0.2s ease-out, height 0.2s ease-out';
+
+             if (windowElement.classList.contains('maximized')) {
+                 windowElement.style.top = state.originalTop || '100px';
+                 windowElement.style.left = state.originalLeft || '150px';
+                 windowElement.style.width = state.originalWidth || '650px';
+                 windowElement.style.height = state.originalHeight || '400px';
+                 windowElement.style.borderRadius = '8px 8px 0 0';
+                 windowElement.classList.remove('maximized');
+                 state.isMaximized = false;
+                 windowElement.style.resize = 'both';
+                 console.log(`ENM_restoreWindow: ${windowId}`);
+             } else {
+                 state.originalTop = windowElement.style.top || windowElement.offsetTop + 'px';
+                 state.originalLeft = windowElement.style.left || windowElement.offsetLeft + 'px';
+                 state.originalWidth = windowElement.style.width || windowElement.offsetWidth + 'px';
+                 state.originalHeight = windowElement.style.height || windowElement.offsetHeight + 'px';
+
+                 windowElement.style.top = `${topBarHeight}px`;
+                 windowElement.style.left = '0px';
+                 windowElement.style.width = '100%';
+                 windowElement.style.height = `${availableHeight}px`;
+                 windowElement.style.borderRadius = '0';
+                 windowElement.classList.add('maximized');
+                 state.isMaximized = true;
+                 windowElement.style.resize = 'none';
+                 console.log(`ENM_maximizeWindow: ${windowId}`);
+             }
+             bringToFront(windowElement);
+             setTimeout(() => { windowElement.style.transition = 'none'; }, 250);
+        }
+
+        function bringToFront(windowElement) {
+             if (!windowElement || windowElement === activeWindow) return;
+             if(activeWindow) { activeWindow.classList.remove('window-active'); }
+             highestZIndex++;
+             windowElement.style.zIndex = highestZIndex;
+             activeWindow = windowElement;
+             windowElement.classList.add('window-active');
+             console.log(`ENM_bringToFront: ${windowElement.id}, zIndex: ${highestZIndex}`);
+        }
+
+        // --- Window Dragging (Unchanged functionally) ---
+        function makeDraggable(windowElement) {
+            const titleBar = windowElement.querySelector('.title-bar');
+            if (!titleBar) return;
+            let isDragging = false, offsetX, offsetY;
+
+            const dragStart = (e) => {
+                if (e.target.tagName === 'BUTTON' || windowElement.classList.contains('maximized')) return;
+                const rect = windowElement.getBoundingClientRect();
+                const clickX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clickY = e.touches ? e.touches[0].clientY : e.clientY;
+                if (clickX > rect.right - 15 && clickY > rect.bottom - 15 && windowElement.style.resize !== 'none') return;
+
+                isDragging = true;
+                offsetX = clickX - windowElement.offsetLeft;
+                offsetY = clickY - windowElement.offsetTop;
+                windowElement.classList.add('dragging');
+                document.body.style.userSelect = 'none'; document.body.style.cursor = 'grabbing';
+                bringToFront(windowElement);
+                document.addEventListener('mousemove', dragMove); document.addEventListener('mouseup', dragEnd);
+                document.addEventListener('touchmove', dragMove, { passive: false }); document.addEventListener('touchend', dragEnd);
+            };
+            const dragMove = (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                const currentX = e.touches ? e.touches[0].clientX : e.clientX;
+                const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+                let newX = currentX - offsetX; let newY = currentY - offsetY;
+                const topBarHeight = document.getElementById('top-bar')?.offsetHeight || 30;
+                const dockHeight = document.getElementById('dock')?.offsetHeight || 60;
+                const winWidth = windowElement.offsetWidth;
+                newX = Math.max(-winWidth + 50, Math.min(newX, window.innerWidth - 50));
+                newY = Math.max(topBarHeight, Math.min(newY, window.innerHeight - dockHeight - 30));
+                windowElement.style.left = `${newX}px`; windowElement.style.top = `${newY}px`;
+            };
+            const dragEnd = () => {
+                if (isDragging) {
+                    isDragging = false; windowElement.classList.remove('dragging');
+                    document.body.style.userSelect = ''; document.body.style.cursor = '';
+                    document.removeEventListener('mousemove', dragMove); document.removeEventListener('mouseup', dragEnd);
+                    document.removeEventListener('touchmove', dragMove); document.removeEventListener('touchend', dragEnd);
+                }
+            };
+            titleBar.addEventListener('mousedown', dragStart); titleBar.addEventListener('touchstart', dragStart, { passive: true });
+            windowElement.addEventListener('mousedown', (e) => {
+                 if (!e.target.closest('.title-bar-controls') && !isDragging) { bringToFront(windowElement); }
+            });
+        }
+
+        // --- Terminal Logic (Added ENM credits) ---
+        function printToTerminal(html, className = '') { /* Unchanged */
+            if (!terminalOutput) return; const terminalWindowContent = terminalOutput.parentElement;
+            const div = document.createElement('div'); if (className) { div.classList.add(className); }
+            div.innerHTML = html; terminalOutput.appendChild(div);
+            const terminalWindow = getWindowElement('terminal-window');
+            if (terminalWindow && terminalWindowContent && terminalWindow.style.display === 'flex') {
+                 terminalWindowContent.scrollTop = terminalWindowContent.scrollHeight;
+            }
+        }
+        function printCommand(command) { /* Unchanged */ printToTerminal(`<span class="prompt">user@ubuntu-web:~$</span> <span class="command">${escapeHtml(command)}</span>`); }
+        function escapeHtml(unsafe) { /* Unchanged */ return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+
+        function executeCommand(command) {
+            printCommand(command);
+            const parts = command.trim().split(' ');
+            const cmd = parts[0].toLowerCase();
+            const args = parts.slice(1).join(' ');
+            let needsPrompt = true;
+
+            switch (cmd) {
+                case 'help': // Updated help
+                    printToTerminal('ENM\'s Ubuntu Web Sim Commands:');
+                    printToTerminal('&nbsp;&nbsp;help &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Show this help message');
+                    printToTerminal('&nbsp;&nbsp;clear &nbsp;&nbsp;&nbsp;&nbsp;- Clear the terminal screen');
+                    printToTerminal('&nbsp;&nbsp;neofetch &nbsp;- Display ENM system information');
+                    printToTerminal('&nbsp;&nbsp;echo [text] - Print text to terminal');
+                    printToTerminal('&nbsp;&nbsp;date &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Display the current date and time');
+                    printToTerminal('&nbsp;&nbsp;whoami &nbsp;&nbsp;&nbsp;- Display the current user (ENM_User)');
+                    printToTerminal('&nbsp;&nbsp;pwd &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Print working directory');
+                    printToTerminal('&nbsp;&nbsp;ls &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- List directory contents');
+                    printToTerminal('&nbsp;&nbsp;cd [dir] &nbsp;- Change directory (simulated)');
+                    printToTerminal('&nbsp;&nbsp;battery&nbsp;&nbsp;&nbsp;- Show ENM battery status');
+                    printToTerminal('&nbsp;&nbsp;sudo ... &nbsp;&nbsp;- Execute as superuser (limited)');
+                    break;
+                case 'clear': if(terminalOutput) terminalOutput.innerHTML = ''; needsPrompt = false; break;
+                case 'neofetch': printNeofetch(); break; // Credits ENM inside
+                case 'echo': printToTerminal(escapeHtml(args)); break;
+                case 'date': printToTerminal(new Date().toString()); break;
+                case 'whoami': printToTerminal('ENM_User'); break;
+                case 'pwd': printToTerminal('/home/ENM_User'); break;
+                 case 'ls': // Match Files app
+                     printToTerminal('<span style="color:#87ceff;">Desktop/</span>&nbsp;&nbsp;<span style="color:#87ceff;">Documents/</span>&nbsp;&nbsp;<span style="color:#87ceff;">Downloads/</span>&nbsp;&nbsp;<span style="color:#87ceff;">Music/</span>&nbsp;&nbsp;<span style="color:#87ceff;">Pictures/</span>&nbsp;&nbsp;<span style="color:#87ceff;">Videos/</span>&nbsp;&nbsp;README.txt&nbsp;&nbsp;ENM_notes.txt');
+                     break;
+                 case 'cd':
+                     if (args === '..') printToTerminal('Changed directory to /home (simulated by ENM)');
+                     else if (args && !args.includes('..')) printToTerminal(`Changed directory to /home/ENM_User/${escapeHtml(args)} (simulated by ENM)`);
+                     else if (!args) printToTerminal('Changed directory to /home/ENM_User (simulated by ENM)');
+                     else printToTerminal(`cd: invalid directory: ${escapeHtml(args)}`, 'error');
+                     break;
+                 case 'battery':
+                     const bLevel = Math.floor(batteryLevel); const bStatus = isCharging ? `Charging (${bLevel}%)` : `Discharging (${bLevel}%)`;
+                     printToTerminal(`ENM Sim Status: ${bStatus}`);
+                     if (!isCharging && bLevel < 10) printToTerminal('Warning: ENM Battery critically low!', 'error');
+                     else if (!isCharging && bLevel < 20) printToTerminal('Warning: ENM Battery low!', 'info');
+                     break;
+                case 'sudo':
+                    if (args.toLowerCase() === 'make me a sandwich') printToTerminal('ENM says: What? Make it yourself.', 'error');
+                    else if (args.toLowerCase() === 'apt update') { /* Sim unchanged */ printToTerminal('Hit:1 ENM_FakeRepo http://archive.ubuntu.com/ubuntu jammy InRelease'); printToTerminal('Get:2 ENM_FakeRepo http://security.ubuntu.com/ubuntu jammy-security InRelease [110 kB]'); printToTerminal('Reading package lists... Done (ENM)'); printToTerminal('Building dependency tree... Done (ENM)'); printToTerminal('All packages are up to date (ENM).'); }
+                    else if (args.toLowerCase().startsWith('apt install ')) { const pkg = escapeHtml(args.substring(12).trim()); if(pkg){ printToTerminal(`Reading package lists... Done`); printToTerminal(`Building dependency tree... Done`); printToTerminal(`Simulating ENM installation of ${pkg}...`); printToTerminal(`Setting up ${pkg} (1.0-enm-fake) ...`); printToTerminal(`Processing triggers for man-db (2.10.2-1) ...`); printToTerminal(`${pkg} installed by ENM (simulated).`); } else printToTerminal('Usage: sudo apt install [package-name]', 'error'); }
+                    else { printToTerminal(`[sudo] password for ENM_User:`); needsPrompt = false; setTimeout(() => { if (Math.random() > 0.3) printToTerminal(`sudo: ${escapeHtml(args.split(' ')[0])}: command not found`, 'error'); else printToTerminal('Sorry, try again. (ENM says no)', 'error'); printToTerminal(`<span class="prompt">user@ubuntu-web:~$</span> `); if (terminalOutput) terminalOutput.parentElement.scrollTop = terminalOutput.parentElement.scrollHeight; }, 500); }
+                    break;
+                case '': break; // Empty command, just need new prompt
+                default: printToTerminal(`ENM Sim: Command not found: ${escapeHtml(cmd)}. Type 'help'.`, 'error'); break;
+            }
+            if (needsPrompt) { printToTerminal(`<span class="prompt">user@ubuntu-web:~$</span> `); }
+            if (terminalOutput && needsPrompt) { setTimeout(() => { terminalOutput.parentElement.scrollTop = terminalOutput.parentElement.scrollHeight; }, 50); }
+        }
+
+        function printNeofetch() { // Added ENM credits
+             const asciiArt = ` /* ASCII Art unchanged */ `; // Keep existing art
+            const uptimeMs = performance.now(); const uptimeSec = Math.floor(uptimeMs / 1000); const uptimeMin = Math.floor(uptimeSec / 60); const uptimeHr = Math.floor(uptimeMin / 60);
+            const uptimeStr = `${uptimeHr}h ${uptimeMin % 60}m ${uptimeSec % 60}s`;
+            const sysInfo = {
+                '<span style="color: #ee55ff;">ENM_User@ubuntu-web</span>': '', '------------------': '',
+                'OS': 'ENM Ubuntu Web Sim v2.3 x86_64', 'Host': `Browser ${navigator.vendor || 'Unknown'}`,
+                'Kernel': `JS ${navigator.platform}`, 'Uptime': uptimeStr,
+                'Packages': `${Math.floor(Math.random()*50 + 25)} (simulated by ENM)`, 'Shell': 'websh 1.3 (ENM)',
+                'Resolution': `${window.innerWidth}x${window.innerHeight}`, 'DE': 'GNOME 42.web (ENM)',
+                'WM': 'Browser Compositor', 'Theme': `${document.body.classList.contains('theme-light') ? 'Yaru-light' : 'Yaru-dark'}-ENM [Web]`,
+                'Icons': 'FontAwesome [Web]', 'Terminal': 'ENM FakeTerm',
+                'CPU': `Your ${navigator.hardwareConcurrency || '?'} Core JS Engine`, 'GPU': 'Browser Renderer API',
+                'Memory': `${Math.floor(Math.random()*100 + 50)}MiB / ${Math.floor(Math.random()*300 + 250)}MiB (ENM Sim)`
+            };
+            printToTerminal(asciiArt); // Print ASCII Art
+            for (const [key, value] of Object.entries(sysInfo)) { printToTerminal(`<span class="neofetch-label">${key.padEnd(18, '&nbsp;')}:</span> <span class="neofetch-value">${value}</span>`); }
+        }
+        if (terminalInput) { /* Listener unchanged */ terminalInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); const command = terminalInput.value; terminalInput.value = ''; executeCommand(command); } }); }
+        else { console.error("ENM_Error: Terminal input element not found!"); }
+
+
+        // --- Settings App Logic ---
+        function showSettingsSection(sectionId) {
+            const settingsMain = document.getElementById('settings-main');
+            const settingsSidebar = document.getElementById('settings-sidebar');
+            if (!settingsMain || !settingsSidebar) return;
+            settingsMain.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+            settingsSidebar.querySelectorAll('div:not(#sidebar-about)').forEach(i => i.classList.remove('active')); // Exclude About link
+            const targetSection = document.getElementById(`settings-${sectionId}`);
+            const activeSidebarItem = settingsSidebar.querySelector(`#sidebar-${sectionId}`);
+            if (targetSection) { targetSection.classList.add('active'); }
+            if(activeSidebarItem) { activeSidebarItem.classList.add('active'); }
+            console.log(`ENM_showSettingsSection: ${sectionId}`);
+        }
+
+        // Theme Switcher
+        if (themeSelect) {
+            themeSelect.addEventListener('change', (e) => {
+                const selectedTheme = e.target.value; // 'light' or 'dark'
+                document.body.classList.remove('theme-light', 'theme-dark'); // Remove existing
+                document.body.classList.add(`theme-${selectedTheme}`); // Add selected
+                console.log(`ENM Theme changed to: ${selectedTheme}`);
+                 // Update battery status color immediately based on new theme
+                 updateBattery();
+            });
+        }
+
+        // Accent Color Picker
+         if (accentColorInput) {
+             accentColorInput.addEventListener('input', (e) => {
+                const newColor = e.target.value;
+                document.documentElement.style.setProperty('--accent-color', newColor);
+                console.log(`ENM Accent color changed to: ${newColor}`);
+             });
+         }
+
+
+        // --- Calculator Logic ---
+        let calculatorState = {
+            displayValue: '0',
+            firstOperand: null,
+            waitingForSecondOperand: false,
+            operator: null,
+        };
+
+        function updateCalcDisplay() {
+            if (!calcDisplay) return;
+            // Limit display length to prevent overflow
+            let valueToDisplay = calculatorState.displayValue;
+            const maxLength = 15; // Adjust as needed
+            if (valueToDisplay.length > maxLength) {
+                valueToDisplay = parseFloat(valueToDisplay).toExponential(maxLength - 5); // Use exponential notation
+            }
+            calcDisplay.textContent = valueToDisplay;
+        }
+
+        function inputDigit(digit) {
+            const { displayValue, waitingForSecondOperand } = calculatorState;
+            if (waitingForSecondOperand === true) {
+                calculatorState.displayValue = digit;
+                calculatorState.waitingForSecondOperand = false;
+            } else {
+                calculatorState.displayValue = displayValue === '0' ? digit : displayValue + digit;
+            }
+        }
+
+        function inputDecimal(dot) {
+             if (calculatorState.waitingForSecondOperand) { // Start new number after operator
+                 calculatorState.displayValue = '0.';
+                 calculatorState.waitingForSecondOperand = false;
+                 return;
+             }
+            // Only add decimal if it doesn't already exist
+            if (!calculatorState.displayValue.includes(dot)) {
+                calculatorState.displayValue += dot;
+            }
+        }
+
+        function handleOperator(nextOperator) {
+            const { firstOperand, displayValue, operator } = calculatorState;
+            const inputValue = parseFloat(displayValue);
+
+            // If an operator is already pending, calculate intermediate result
+             if (operator && calculatorState.waitingForSecondOperand) {
+                 calculatorState.operator = nextOperator; // Change the operator
+                 return;
+             }
+
+            if (firstOperand == null && !isNaN(inputValue)) {
+                calculatorState.firstOperand = inputValue;
+            } else if (operator) {
+                const result = performCalculation[operator](firstOperand, inputValue);
+                calculatorState.displayValue = `${parseFloat(result.toFixed(10))}`; // Limit precision
+                calculatorState.firstOperand = result;
+            }
+
+            calculatorState.waitingForSecondOperand = true;
+            calculatorState.operator = nextOperator;
+        }
+
+        const performCalculation = {
+            '/': (first, second) => second === 0 ? 'Error' : first / second,
+            '*': (first, second) => first * second,
+            '+': (first, second) => first + second,
+            '-': (first, second) => first - second,
+             //'=' handled separately
+        };
+
+        function resetCalculator() {
+            calculatorState = { displayValue: '0', firstOperand: null, waitingForSecondOperand: false, operator: null };
+        }
+
+         function toggleSign() {
+            const currentValue = parseFloat(calculatorState.displayValue);
+            if (currentValue === 0) return; // Don't toggle zero
+            calculatorState.displayValue = (currentValue * -1).toString();
+         }
+
+         function calculatePercent() {
+             const currentValue = parseFloat(calculatorState.displayValue);
+             calculatorState.displayValue = (currentValue / 100).toString();
+              // Optional: Immediately allow chaining after %
+              calculatorState.waitingForSecondOperand = false;
+         }
+
+
+        if (calcButtonsContainer) {
+            calcButtonsContainer.addEventListener('click', (event) => {
+                const { target } = event;
+                if (!target.matches('button')) { return; } // Exit if click wasn't on a button
+
+                const action = target.dataset.action;
+                const buttonValue = target.textContent.trim(); // Get text like '7', '+', 'AC'
+
+                switch (action) {
+                    case 'number':
+                        inputDigit(buttonValue);
+                        break;
+                    case 'decimal':
+                        inputDecimal(buttonValue);
+                        break;
+                    case 'operator':
+                         const operator = target.dataset.operator; // 'add', 'subtract', etc.
+                         handleOperator(operator);
+                        break;
+                    case 'equals':
+                         if (calculatorState.operator && calculatorState.firstOperand != null) {
+                             const inputValue = parseFloat(calculatorState.displayValue);
+                              if (calculatorState.operator === 'divide' && inputValue === 0) {
+                                 calculatorState.displayValue = 'Error';
+                              } else {
+                                const result = performCalculation[calculatorState.operator](calculatorState.firstOperand, inputValue);
+                                calculatorState.displayValue = `${parseFloat(result.toFixed(10))}`;
+                              }
+                             calculatorState.firstOperand = null; // Ready for new calculation
+                             calculatorState.operator = null;
+                             calculatorState.waitingForSecondOperand = true; // Display result, wait for next input
+                         }
+                        break;
+                    case 'clear':
+                        resetCalculator();
+                        break;
+                     case 'toggle-sign':
+                         toggleSign();
+                         break;
+                     case 'percent':
+                         calculatePercent();
+                         break;
+                    default:
+                        console.warn("ENM Calc: Unknown button action:", action);
+                }
+                updateCalcDisplay();
+                console.log("ENM Calc State:", JSON.stringify(calculatorState)); // Debug log
+            });
+        } else {
+            console.error("ENM_Error: Calculator buttons container not found!");
+        }
+
+
+        // --- Initialization ---
+        function initializeDesktop() {
+            console.log("ENM Desktop Features Initializing...");
+            document.querySelectorAll('.window').forEach(makeDraggable);
+
+            if (terminalOutput && terminalInput) {
+                printToTerminal(`Welcome to ENM's Ubuntu Web Simulation Terminal v2.3!`);
+                printToTerminal(`Type "help" for commands. ENM Battery: ${Math.floor(batteryLevel)}% (${isCharging ? 'Charging' : 'Discharging'}).`);
+                printToTerminal(`<span class="prompt">user@ubuntu-web:~$</span> `);
+                 const termWindow = getWindowElement('terminal-window');
+                 if (termWindow && termWindow.style.display === 'flex') { terminalInput.focus(); }
+            }
+
+            showSettingsSection('network'); // Start with network settings visible
+            updateCalcDisplay(); // Initial calculator display
+            updateBattery(); // Initial battery status
+
+            // Set initial theme from select (default is dark)
+            document.body.classList.add(`theme-${themeSelect?.value || 'dark'}`);
+             // Set initial accent color from input
+             document.documentElement.style.setProperty('--accent-color', accentColorInput?.value || '#E95420');
+
+
+            // Konami Code Listener
+            const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+            let konamiIndex = 0;
+            document.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') { konamiIndex = 0; return; }
+                if (e.key.toLowerCase() === konamiCode[konamiIndex].toLowerCase()) {
+                    konamiIndex++;
+                    if (konamiIndex === konamiCode.length) {
+                        konamiIndex = 0; alert('ENM Konami Code Activated! 🎉');
+                        document.body.style.transition = 'filter 0.5s ease-in-out'; // Smooth transition
+                        document.body.style.filter = 'invert(1) hue-rotate(180deg) saturate(1.5)';
+                        setTimeout(() => { document.body.style.filter = ''; setTimeout(()=> document.body.style.transition = '', 500); }, 1500);
+                    }
+                } else if (e.key === konamiCode[0]) { konamiIndex = 1; }
+                else { konamiIndex = 0; }
+            });
+
+            console.log("ENM Ubuntu Web Simulation Initialized.");
+        }
+
+        // --- Run initialization ---
+        if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initializeDesktop); }
+        else { initializeDesktop(); }
+
+        console.log("ENM Script Parsed.");
+    </script>
+</body>
+</html>
